@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Path Marker</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h3>Path Marker</h3>
+  <div id="map"></div>
+
+  <script>
+    var map;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 0, lng: 0},
+        zoom: 3
+      });
+
+      // Function to add a marker to the map
+      function addMarker(location) {
+        new google.maps.Marker({
+          position: location,
+          map: map
+        });
+      }
+
+      // Function to make API request and add markers along the path
+      function addMarkersAlongPath() {
+        var SERVER_URL = "http://localhost:5000";
+        var REST_API = SERVER_URL + "/calculate?pntdata=";
+        
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", REST_API, true);
+        xhttp.onload = function () {
+          if (xhttp.readyState === 4 && xhttp.status === 200) {
+            var pathCoordinates = JSON.parse(xhttp.responseText);
+            for (var i = 0; i < pathCoordinates.length; i++) {
+              addMarker(pathCoordinates[i]);
+            }
+          } else {
+            console.error("Error fetching path:", xhttp.statusText);
+          }
+        };
+        xhttp.onerror = function () {
+          console.error("Error connecting to server:", SERVER_URL);
+        };
+        xhttp.send();
+      }
+
+      // Call function to add markers along the path
+      addMarkersAlongPath();
+    }
+  </script>
+
+  <!-- Load the Google Maps JavaScript API asynchronously -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap" async defer></script>
+</body>
+</html>
